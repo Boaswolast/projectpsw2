@@ -1,0 +1,173 @@
+-- phpMyAdmin SQL Dump
+-- version 5.1.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: May 11, 2022 at 09:58 PM
+-- Server version: 10.4.20-MariaDB
+-- PHP Version: 7.3.29
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `ppdb_online(new)`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `administrasi`
+--
+
+CREATE TABLE `administrasi` (
+  `id_administrasi` int(11) NOT NULL,
+  `id_identitas_siswa` int(11) NOT NULL,
+  `harga` int(16) NOT NULL,
+  `status` enum('Lunas','Belum Lunas') NOT NULL,
+  `tgl_buat` datetime NOT NULL,
+  `tgl_ubah` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `administrasi`
+--
+
+INSERT INTO `administrasi` (`id_administrasi`, `id_identitas_siswa`, `harga`, `status`, `tgl_buat`, `tgl_ubah`) VALUES
+(5, 1, 1250000, 'Lunas', '2020-09-17 09:48:12', '2020-09-17 08:22:50');
+
+--
+-- Triggers `administrasi`
+--
+DELIMITER $$
+CREATE TRIGGER `HapusAdministrasi` AFTER DELETE ON `administrasi` FOR EACH ROW BEGIN
+  UPDATE identitas_siswa SET status_administrasi = 0 
+  WHERE Id_Identitas_Siswa = OLD.id_identitas_siswa; 
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `TambahAdministrasi` AFTER INSERT ON `administrasi` FOR EACH ROW BEGIN
+  UPDATE identitas_siswa SET status_administrasi = 1 
+  WHERE Id_Identitas_Siswa = NEW.id_identitas_siswa;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `identitas_siswa`
+--
+
+CREATE TABLE `identitas_siswa` (
+  `Id_Mahasiswa` int(11) NOT NULL,
+  `nim` varchar(15) NOT NULL,
+  `nama` varchar(50) NOT NULL,
+  `kelas` varchar(50) NOT NULL,
+  `prodi` varchar(20) NOT NULL,
+  `jenis_kelamin` enum('Laki-Laki','Perempuan') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `identitas_siswa`
+--
+
+INSERT INTO `identitas_siswa` (`Id_Mahasiswa`, `nim`, `nama`, `kelas`, `prodi`, `jenis_kelamin`) VALUES
+(1, '0001999901', 'Agung Dermawan', '', '', 'Laki-Laki'),
+(3, '0131293812', 'Jonatan Zilguin', '', '', 'Laki-Laki'),
+(4, '0120981371', 'Iskandar Muda', '', '', 'Laki-Laki');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user`
+--
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL,
+  `nama` char(45) NOT NULL,
+  `username` char(65) NOT NULL,
+  `password` char(125) NOT NULL,
+  `hak` enum('admin','pegawai') NOT NULL,
+  `status` enum('aktif','tidak aktif') NOT NULL,
+  `tgl_buat` datetime NOT NULL,
+  `tgl_ubah` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`id`, `nama`, `username`, `password`, `hak`, `status`, `tgl_buat`, `tgl_ubah`) VALUES
+(1, 'Andi Santosoku', 'andisantoso', 'andisantoso', 'pegawai', 'aktif', '2020-09-16 19:09:20', '2020-09-16 17:20:12'),
+(6, 'Tiara Ekylia Eriza Putri', 'tiaraekylia', 'tiaraekylia', 'admin', 'aktif', '2020-09-16 18:32:57', '2020-09-17 14:14:28');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `administrasi`
+--
+ALTER TABLE `administrasi`
+  ADD PRIMARY KEY (`id_administrasi`),
+  ADD KEY `id_identitas_siswa` (`id_identitas_siswa`);
+
+--
+-- Indexes for table `identitas_siswa`
+--
+ALTER TABLE `identitas_siswa`
+  ADD PRIMARY KEY (`Id_Mahasiswa`),
+  ADD UNIQUE KEY `NISN` (`nim`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `administrasi`
+--
+ALTER TABLE `administrasi`
+  MODIFY `id_administrasi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `identitas_siswa`
+--
+ALTER TABLE `identitas_siswa`
+  MODIFY `Id_Mahasiswa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `administrasi`
+--
+ALTER TABLE `administrasi`
+  ADD CONSTRAINT `administrasi_ibfk_1` FOREIGN KEY (`id_identitas_siswa`) REFERENCES `identitas_siswa` (`Id_Mahasiswa`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
